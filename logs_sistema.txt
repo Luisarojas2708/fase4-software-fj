@@ -1,0 +1,127 @@
+from abc import ABC, abstractmethod
+import logging
+
+# Configuración del archivo de logs
+logging.basicConfig(
+    filename='logs_sistema.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+# Excepción personalizada
+class ErrorSistema(Exception):
+    pass
+
+
+# Clase abstracta principal
+class EntidadSistema(ABC):
+
+    @abstractmethod
+    def mostrar(self):
+        pass
+
+
+# Clase Cliente
+class Cliente(EntidadSistema):
+
+    def __init__(self, nombre, cedula):
+
+        if not nombre:
+            raise ErrorSistema("El nombre no puede estar vacío")
+
+        if not cedula.isdigit():
+            raise ErrorSistema("La cédula debe contener solo números")
+
+        self.__nombre = nombre
+        self.__cedula = cedula
+
+    def mostrar(self):
+        return f"Cliente: {self.__nombre} - {self.__cedula}"
+
+
+# Clase abstracta Servicio
+class Servicio(ABC):
+
+    def __init__(self, nombre, precio):
+        self.nombre = nombre
+        self.precio = precio
+
+    @abstractmethod
+    def calcular_costo(self):
+        pass
+
+    @abstractmethod
+    def descripcion(self):
+        pass
+
+
+# Servicio 1
+class ReservaSala(Servicio):
+
+    def calcular_costo(self):
+        return self.precio * 2
+
+    def descripcion(self):
+        return f"Reserva de sala: {self.nombre}"
+
+
+# Servicio 2
+class AlquilerEquipo(Servicio):
+
+    def calcular_costo(self):
+        return self.precio * 3
+
+    def descripcion(self):
+        return f"Alquiler de equipo: {self.nombre}"
+
+
+# Servicio 3
+class AsesoriaEspecializada(Servicio):
+
+    def calcular_costo(self):
+        return self.precio * 4
+
+    def descripcion(self):
+        return f"Asesoría especializada: {self.nombre}"
+
+
+# Clase Reserva
+class Reserva:
+
+    def __init__(self, cliente, servicio, duracion):
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.estado = "Pendiente"
+
+    def confirmar(self):
+        self.estado = "Confirmada"
+
+    def cancelar(self):
+        self.estado = "Cancelada"
+
+    def procesar(self):
+        try:
+            if self.duracion <= 0:
+                raise ErrorSistema("Duración inválida")
+
+            total = self.servicio.calcular_costo() * self.duracion
+
+            logging.info(
+                f"Reserva procesada: {self.cliente.mostrar()} "
+                f"- {self.servicio.descripcion()}"
+            )
+
+            return total
+
+        except Exception as e:
+            logging.error(str(e))
+            raise
+            2026-06-29 12:34:48,638 - INFO - Reserva procesada: Cliente: Luis Rojas - 123456 - Reserva de sala: Sala Premium
+2026-06-29 12:34:48,639 - ERROR - Duración inválida
+2026-06-29 12:34:48,639 - INFO - Reserva procesada: Cliente: Luis Rojas - 123456 - Asesoría especializada: Python
+2026-06-29 12:39:18,168 - INFO - Reserva procesada: Cliente: Luis Rojas - 123456 - Reserva de sala: Sala Premium
+2026-06-29 12:39:18,168 - ERROR - Duración inválida
+2026-06-29 12:39:18,168 - INFO - Reserva procesada: Cliente: Luis Rojas - 123456 - Asesoría especializada: Python
+2026-06-29 12:39:18,168 - INFO - Prueba de escritura en logs_sistema.txt
+2026-06-29 12:39:18,168 - ERROR - Prueba de error registrada en logs_sistema.txt
